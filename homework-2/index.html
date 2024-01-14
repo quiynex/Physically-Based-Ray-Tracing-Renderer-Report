@@ -1,0 +1,216 @@
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+**Homework 2 - Sampling and Warping**
+
+Student Name: Yingzhe Liu
+
+Legi Number:
+(Note: please read the [supplementary](#supplementary) section first before working on this report.)
+
+# Square to Uniform Disk
+**Time spent on this task: 45min**
+
+**Describe your implementation of `Warp::squareToUniformDisk` and the associated PDF.**
+
+I followed the steps on the class slide to implement the sampling and the PDF. First, I found that $p_p(r, \theta) = rp_c(x, y) = r/\pi$. Then, I found the marginal
+PDF $p(r) = \int_0^{2\pi}r/\pi d\theta = 2r$. Then, $P(r) = \int_0^{r}2rdr = r^2$, $r = \sqrt{\xi_1}$. Also, $p(\theta) = p(\theta | r) = p_p(r, \theta) / p(r) = 1 / 2\pi$.
+Then, $P(\theta) = \int_0^{\theta}1/2\pi d\theta = \theta/2\pi$, $\theta = 2\pi \xi_2$.
+
+For the PDF, the probability that a point will be selected is 1 over the area of the disk, which is $1 / \pi$.
+
+...
+
+**Warping Visualization:**
+
+<p style="text-align:center;"><img src="images/sqrToDisk.png" alt="Uniform Disk Warp" /></p>
+
+**$\chi^2$ Hypothesis Test Outcome:**
+
+<p style="text-align:center;"><img src="images/sqrToDiskPDF.png" alt="Uniform Disk Chi2 Test" /></p>
+
+
+# Square to Uniform Sphere
+**Time spent on this task: 1h**
+
+**Describe your implementation of `Warp::squareToUniformSphere` and the associated PDF.**
+
+The sampling is done by calling Warp::squareToUniformSphereCap with cosThetaMax set to -1 since theta will be 180 degrees for a sphere. The PDF is done by calling
+Warp::squareToUnifromSphereCapPdf with same settings.
+
+...
+
+**Warping Visualization:**
+
+<p style="text-align:center;"><img src="images/sqrToSphere.png" alt="Uniform Sphere Warp" /></p>
+
+**$\chi^2$ Hypothesis Test Outcome:**
+
+<p style="text-align:center;"><img src="images/sqrToSpherePdf.png" alt="Uniform Sphere Chi2 Test" /></p>
+
+
+# Square to Uniform Hemisphere
+**Time spent on this task: 1h**
+
+**Describe your implementation of `Warp::squareToUniformHemisphere` and the associated PDF.**
+
+The sampling is done by calling Warp::squareToUniformSphereCap with cosThetaMax set to 0 since theta will be 90 degrees for a hemisphere. The PDF is done by calling
+Warp::squareToUnifromSphereCapPdf with same settings.
+
+...
+
+**Warping Visualization:**
+
+<p style="text-align:center;"><img src="images/sqrToHemi.png" alt="Uniform Hemisphere Warp" /></p>
+
+**$\chi^2$ Hypothesis Test Outcome:**
+
+<p style="text-align:center;"><img src="images/sqrToHemiPDF.png" alt="Uniform Hemisphere Chi2 Test" /></p>
+
+
+# Square to Uniform Spherical Cap
+**Time spent on this task: 1h**
+
+**Describe your implementation of `Warp::squareToUniformSphericalCap` and the associated PDF.**
+
+For the sampling, I followed the recipe on the class slides. First, I modelled the probability distribution function of the surface area of a cylinder,
+$$p_c(h, \phi) = \frac{1}{2\pi a}$$ where a is the distance from the top of the cylinder, h is the height of the cylinder, and $\phi$ is the angle on the horizontal surface.
+Then, I found another coordinate to express the sphere using $\theta$ and $\phi$. The transformation is: $$h = 1 - \cos{\theta}$$ and $$\phi = \phi$$ This is due to the definition
+of a spherical cap, where the distance from the top of the sphere is $1 - \cos{\theta}$. Then, the Jacobian matrix $J_T(\theta, \phi)$ of the transformation is:
+\begin{pmatrix}
+    \sin{\theta}    &0 \\
+    0               &1
+\end{pmatrix}
+Then, it is clear to see that the determinant is $\sin{\theta}$. It follows later that $$p_S(\theta, \phi) = |J_T|\,p_C(h, \phi) = \frac{\sin{\theta}}{2\pi a}$$
+$$p(\theta) = \int_0^{2\pi}p_S(\theta, \phi)d\phi = \int_0^{2\pi}\frac{\sin{\theta}}{2\pi a}\,d\phi = \frac{\sin{\theta}}{a}$$
+$$P(\theta) = \int_0^{\theta}p(\theta)d\theta = \int_0^{\theta}\frac{\sin{\theta}}{a}\,d\theta = -\frac{\cos{\theta}}{a}$$
+Regulating within the bound of arccos, we have
+$$\theta = \arccos{(1 - a\xi_1)}$$
+For $\phi$, we have
+$$p(\phi) = \frac{p_S(\theta,\phi)}{p(\theta)} = \frac{1}{2\pi}$$
+$$\phi = 2\pi\xi_2$$
+...
+
+**Warping Visualization:**
+
+<p style="text-align:center;"><img src="images/sCap.png" alt="Uniform Spherical Cap Warp" /></p>
+
+**$\chi^2$ Hypothesis Test Outcome:**
+
+<p style="text-align:center;"><img src="images/sCapPDF.png" alt="Uniform Spherical Cap Chi2 Test" /></p>
+
+
+# Square to Cosine Hemisphere
+**Time spent on this task: **
+
+**Describe your implementation of `Warp::squareToCosineHemisphere` and the associated PDF.**
+
+For the sampling, I mapped the uniform disk sampling to a hemisphere. So, the x and y coordinates of the sampling are the same as the disk. The z coordinate is $\sqrt{1 - x^2 - y^2}$
+since the radius is always 1.
+
+For the PDF, $p(\omega) = \cos{\theta}/\pi$.
+
+...
+
+**Warping Visualization:**
+
+<p style="text-align:center;"><img src="images/sqrToHemiCos.png" alt="Cosine Hemisphere Warp" /></p>
+
+**$\chi^2$ Hypothesis Test Outcome:**
+
+<p style="text-align:center;"><img src="images/sqrToHemiCosPDF.png" alt="Cosine Hemisphere Chi2 Test" /></p>
+
+
+# Square to Beckmann
+
+(Please use the provided LaTeX template to answer the questions in this section. For LaTeX math symbols and formulas, referring to this [cheatsheet](http://tug.ctan.org/info/undergradmath/undergradmath.pdf) is recommended.)
+
+**Time spent on this task: 2h**
+
+**Show your derivation of $\int_0^{2\pi}\int_0^{\frac{\pi}{2}}p(\theta, \phi)~d\theta d\phi = 1$ for Beckmann distribution**:
+
+\begin{equation}
+    \begin{split}
+    \bullet ~ P(\theta_0, \phi_0) & = \int_0^{\phi_0}\int_0^{\theta_0}p(\theta, \phi)~d\theta d\phi \\
+                        & = \int_0^{\phi_0}\int_0^{\theta_0}\frac{e^{\frac{-\tan^2\theta}{\alpha^2}}}{\pi \alpha^2 \cos^4\theta} \cos\theta \sin\theta ~d\theta d\phi \\
+                        & = \frac{1}{2}\int_0^{\phi_0}\int_{\cos(\theta_0)}^{1}\frac{e^{-\frac{1 - x^2}{x^2\alpha^2}}}{\pi\alpha^2x^3}\,dxd\phi,\: x = \cos\theta, dx = -\sin\theta d\theta \\
+                        & = \frac{1}{2\pi}\int_0^{\phi_0}1 - e^{\frac{-\tan^2\theta_0}{\alpha^2}}\,d\phi \\
+                        & = \frac{1}{2\pi}\left(1 - e^{\frac{-\tan^2\theta_0}{\alpha^2}}\right) \left(\phi\Bigg|_{0}^{\phi_0}\right) \\
+                        & = \frac{\phi_0}{2\pi}\left(1 - e^{\frac{-\tan^2\theta_0}{\alpha^2}} \right) \\
+    \bullet ~ P(\frac{\pi}{2}, 2\pi) & = 1 - e^{\frac{-\tan^2\frac{\pi}{2}}{\alpha^2}} \\
+                               & = 1 - \frac{1}{e^{\frac{\tan^2\frac{\pi}{2}}{\alpha^2}}} \\
+                               & = 1 - \frac{1}{\infty} \\
+                               & = 1
+    \end{split}
+\end{equation}
+
+**Show your derivation of the Beckmann distribution sampling strategy by inverting the CDF, given random uniform samples $\xi_1, \xi_2$**:
+\begin{equation}
+    \begin{split}
+    & \bullet ~ p(\theta, \phi) = \frac{e^{\frac{-\tan^2\theta}{\alpha^2}}}{\pi \alpha^2 \cos^4\theta} \cos\theta \sin\theta \\
+    & \bullet ~ p(\theta) = \int_0^{2\pi}\frac{e^{\frac{-\tan^2\theta}{\alpha^2}}}{\pi \alpha^2 \cos^4\theta} \cos\theta \sin\theta \,d\phi = 2\pi\left(\frac{e^{\frac{-\tan^2\theta}{\alpha^2}}}{\pi \alpha^2 \cos^4\theta} \cos\theta \sin\theta \right) \\
+    & \bullet ~ P(\theta) = 2\pi\int_0^{\theta}p(\theta)d\theta = 1 - e^{\frac{-\tan^2\theta}{\alpha^2}} \\
+    & \bullet ~ p(\phi) = \frac{p(\theta,\phi)}{p(\theta)} = \frac{1}{2\pi} \\
+    & \bullet ~ P(\phi) = \int_0^{\phi}p(\phi)d\phi = \frac{\phi}{2\pi} \\
+    & \bullet ~ \phi = 2\pi\xi_2 \\
+    & \bullet ~ \theta = \arctan\left(\sqrt{-\alpha^2\ln(1-\xi_1)}\right) \\
+    & \bullet ~ Sampled ~ Point: \\
+    & ~~~~ x = \sin\theta\cos\phi \\
+    & ~~~~ y = \sin\theta\sin\phi \\
+    & ~~~~ z = \cos\theta
+
+    \end{split}
+\end{equation}
+
+**Warping Visualization:**
+
+<p style="text-align:center;"><img src="images/beckmann.png" alt="Beckmann Warp" /></p>
+
+**$\chi^2$ Hypothesis Test Outcome:**
+
+<p style="text-align:center;"><img src="images/beckmannPDF.png" alt="Beckmann Chi2 Test" /></p>
+
+
+# Feedback
+**Use this section to provide feedback about this assignment (each task, the handout, Nori, etc.). We appreciate your opinions to help improve future homeworks and projects.**
+
+This difficulty of this assignment is not too hard, but the latex part is a bit time consuming.
+
+...
+
+
+# Supplementary
+* For each task, please note down the time you spent working through it and use at least a few sentences to describe your implementation. If applicable, also report the problems you encounter (e.g. whether or how it's solved, what is the difficult part).
+
+* Please let us know to what extent your code is working (e.g. you only managed to work through part of this assignment, or your solution doesn't operate as expected in some corner cases). We encourage you to share your thinking process, and points will be granted based on your description even if the code is not 100% functioning.
+
+* Nori generates both EXR and PNG format output. Please use PNG for image comparison in the report.
+
+* This report template uses [Markdeep](https://casual-effects.com/markdeep/), which supports Markdown syntax in HTML file. For example usage, please refer to the [official demo document](https://casual-effects.com/markdeep/features.md.html).
+
+* LaTeX is also supported for typing mathematical formulas:
+$$
+L_o(\mathbf{x}, \omega_o) = \int_{\Omega} L_i(\mathbf{x},\omega_i)\, f(\mathbf{x}, \omega_i, \omega_o)\, |\cos\theta_i|\, \mathrm{d}\omega_i
+$$
+
+
+
+<!-- Bootstrap core CSS and JavaScript -->
+
+<link href="../resources/offcanvas.css" rel="stylesheet">
+<link href="../resources/twentytwenty.css" rel="stylesheet" type="text/css" />
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="../resources/bootstrap.min.js"></script>
+<script src="../resources/jquery.event.move.js"></script>
+<script src="../resources/jquery.twentytwenty.js"></script>
+
+<script>
+    $(window).load(function () { $(".twentytwenty-container").twentytwenty({ default_offset_pct: 0.5 }); });
+</script>
+
+<!-- Markdeep: -->
+<script>var markdeepOptions = { onLoad: function () { $(".twentytwenty-container").twentytwenty({ default_offset_pct: 0.5, move_slider_on_hover: true }); }, tocStyle: 'none' };</script>
+<script src="https://morgan3d.github.io/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>
+<script>window.alreadyProcessedMarkdeep || (document.body.style.visibility = "visible")</script>
